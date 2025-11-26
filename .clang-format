@@ -1,0 +1,35 @@
+BasedOnStyle: Microsoft
+
+SortIncludes: Never
+
+TabWidth: 4
+IndentWidth: 4
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: true
+  AfterNamespace: false
+  AfterClass: true
+
+AlignAfterOpenBracket: true
+
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: Inline
+
+AllowAllParametersOfDeclarationOnNextLine: true
+SpaceBeforeParens: false
+
+PPIndentWidth: 4
+IndentPPDirectives: BeforeHash
+
+IndentAccessModifiers: false
+AccessModifierOffset: 0
+PackConstructorInitializers: NextLineOnly
+AlignConsecutiveMacros: Consecutive
+AlignConsecutiveAssignments: Consecutive
