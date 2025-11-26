@@ -174,4 +174,4 @@ Contributions are welcome! If you'd like to contribute, please follow these step
 
 ## License
 
-This project is open-source. Consider adding a license file, such as the MIT License, to clarify how others can use your code.
+This project is open-source and under the MIT License, learn more by reading LICENSE.md
