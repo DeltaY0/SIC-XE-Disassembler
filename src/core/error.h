@@ -1,3 +1,4 @@
+#pragma once
 #include "defines.h"
 
 // error code macros
@@ -27,6 +28,7 @@ class Error
     }
 
     const char *what() const { return message; }
+    const u32 errcode() const { return code; }
 };
 
 } // namespace ylib

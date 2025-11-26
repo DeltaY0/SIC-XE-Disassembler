@@ -1,7 +1,6 @@
 #include "core/logger.h"
 #include "util/opcode_parser.h"
-
-#define OPCODEFILE "res/opcodes.txt"
+#include "core/error.h"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
@@ -19,22 +18,36 @@ i32 main(i32 argc, char *argv[]) {
         )
     )
 
-    op::load_instructions(OPCODEFILE);
-    LOGFMT(
-        "OPCODE",
-        GREEN_TEXT("Loading Operations Successful!")
-    )
+    if (argc < 3) {
+        LLOG("[", RED_TEXT("USAGE ERROR"), "]:\t")
+        LLOG(
+            YELLOW_TEXT("Usage: "),
+            "ysicxe <input_object_file> <output_assembly_file>\n"
+        )
 
-    string tstop = "00";
-    if(argc > 1) tstop = argv[1];
-    op::instruction tst;
-    tst = op::instr_table[base::hextobin(tstop)];
-    LOGFMT(
-        "OPCODE",
-        "operation 0x", tstop, ": ",
-        PURPLE_TEXT("\n\tname: ", tst.mnemonic),
-        YELLOW_TEXT("\n\tfmt:  ", tst.format)
-    )
+        return 1;
+    }
+
+    string input_file = argv[1];
+    string output_file = argv[2];
+
+    try {
+        // load opcodes from the resource file
+        op::load_instructions("res/opcodes.txt");
+
+        LOGFMT(
+            "OPCODE",
+            GREEN_TEXT("Loading Operations Successful!"), "\n"
+        )
+
+        // TODO: Call the disassembler to do the work
+        // ex: sic::dasm::process(input_file, output_file);
+
+    } catch (const ylib::Error& e) {
+        LLOG("[", RED_TEXT("ERROR"), "]:\t")
+        LLOG(e.what())
+        return e.errcode();
+    }
 
     return 0;
 }

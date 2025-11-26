@@ -8,10 +8,13 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <fstream>
+#include <iomanip>
 
 using std::string;
 using std::map;
 using std::ifstream;
+using std::ofstream;
 using std::stringstream;
 
 // unsigned int types
