@@ -49,10 +49,10 @@ Follow these instructions to get a copy of the project up and running on your lo
 2.  **Create a data directory and opcode file:**
     The disassembler requires an opcode definition file.
     *   Create a directory named `data` in the project root.
-    *   Inside `data`, create a file named `opcodes.dat`.
-    *   Populate `opcodes.dat` with SIC/XE instructions. Each line should be in the format: `MNEMONIC OPCODE FORMAT`.
+    *   Inside `data`, create a file named `opcodes.txt`.
+    *   Populate `opcodes.txt` with SIC/XE instructions. Each line should be in the format: `MNEMONIC OPCODE FORMAT`.
 
-    **Example `res/opcodes.dat`:**
+    **Example `res/opcodes.txt`:**
     ```
     ADD 18 3
     ADDF 58 3
@@ -140,7 +140,7 @@ Run the disassembler from the command line, providing the input object file and 
 
 ```
 ├── bin/              # Compiled binaries
-├── res/              # Data files (e.g., opcodes.dat)
+├── res/              # Data files (e.g., opcodes.txt)
 ├── obj/              # Intermediate object files (.o)
 ├── src/              # C++ source code
 │   ├── core/         # Core modules (logger, defines, error handling)
@@ -155,7 +155,7 @@ Run the disassembler from the command line, providing the input object file and 
 
 The disassembler operates by reading a SIC/XE object file, which consists of Header (H), Text (T), and End (E) records.
 
-1.  **Load Opcodes**: The program first loads the instruction mnemonics, opcodes, and formats from `res/opcodes.dat` into an in-memory table for quick lookups.
+1.  **Load Opcodes**: The program first loads the instruction mnemonics, opcodes, and formats from `res/opcodes.txt` into an in-memory table for quick lookups.
 2.  **Parse Header Record**: It reads the `H` record to determine the program name and its starting address.
 3.  **Process Text Records**: For each `T` record, it iterates through the object code byte by byte.
 4.  **Instruction Lookup**: It identifies the opcode for an instruction. The two least significant bits are masked off to handle format 4 instructions correctly.
