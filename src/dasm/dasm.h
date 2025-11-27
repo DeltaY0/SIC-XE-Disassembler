@@ -1,5 +1,8 @@
 #include  "../util/opcode_parser.h"
 
+#include <vector>
+using std::vector;
+
 namespace sic {
 
 struct asmline {
@@ -17,6 +20,8 @@ private:
     i32 locctr; // location counter
     string objfile;
     string outfile;
+
+    vector<asmline> assembly;
 
     void process_header(string record);
     void process_text(string record);
