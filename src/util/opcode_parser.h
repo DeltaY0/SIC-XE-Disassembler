@@ -23,6 +23,18 @@ struct instruction {
 // maps opcode -> instruction (since we are disassembling)
 map<u8, instruction> instr_table;
 
+const map<u8, string> reg_table = {
+    {0, "A"},
+    {1, "X"},
+    {2, "L"},
+    {3, "B"},
+    {4, "S"},
+    {5, "T"},
+    {6, "F"},
+    {8, "PC"},
+    {9, "SW"}
+};
+
 void load_instructions(string filepath) {
     ifstream file(filepath);
     

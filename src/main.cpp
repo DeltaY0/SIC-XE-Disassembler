@@ -1,6 +1,10 @@
 #include "core/logger.h"
-#include "util/opcode_parser.h"
 #include "core/error.h"
+
+#include "util/opcode_parser.h"
+#include "dasm/dasm.h"
+
+#define OPCODES_FILE "res/opcodes.txt"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
@@ -28,20 +32,21 @@ i32 main(i32 argc, char *argv[]) {
         return 1;
     }
 
-    string input_file = argv[1];
-    string output_file = argv[2];
+    string infile = argv[1];
+    string outfile = argv[2];
 
     try {
         // load opcodes from the resource file
-        op::load_instructions("res/opcodes.txt");
+        op::load_instructions(OPCODES_FILE);
 
         LOGFMT(
             "OPCODE",
             GREEN_TEXT("Loading Operations Successful!"), "\n"
         )
 
-        // TODO: Call the disassembler to do the work
-        // ex: sic::dasm::process(input_file, output_file);
+        // call the disassembler to do the work
+        sic::dasm dasm(infile, outfile);
+        dasm.run();
 
     } catch (const ylib::Error& e) {
         LLOG("[", RED_TEXT("ERROR"), "]:\t")
