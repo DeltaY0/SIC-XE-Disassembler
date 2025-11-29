@@ -323,7 +323,14 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
         return line;
     }
 
-    if (addr + 2 >= memory.size()) { line.len=0; return line; }
+    if (addr + 2 >= memory.size()) {
+        // not enough mem for format 3, handle as data
+        line.len = 1;
+        line.inst.mnemonic = "BYTE";
+        line.objcode = base::bintohex(byte1, 2);
+        line.operand = "X'" + line.objcode + "'";
+        return line;
+    }
     
     // format 3/4
     u8 byte2 = memory[addr + 1];
@@ -343,7 +350,15 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
         line.inst.mnemonic = "+" + inst.mnemonic;
         line.inst.format = 4;
 
-        if (addr + 3 >= memory.size()) { line.len=0; return line; }
+        if (addr + 3 >= memory.size()) {
+            // not enough mem for format 4, handle as data
+            line.len = 1;
+            line.inst.mnemonic = "BYTE";
+            line.objcode = base::bintohex(byte1, 2);
+            line.operand = "X'" + line.objcode + "'";
+            return line;
+        }
+
         u8 byte4 = memory[addr + 3];
         line.objcode = base::bintohex(byte1, 2) + base::bintohex(byte2, 2) + 
                        base::bintohex(byte3, 2) + base::bintohex(byte4, 2);
