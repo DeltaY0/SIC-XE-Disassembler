@@ -8,6 +8,14 @@
 
 i32 main(i32 argc, char *argv[]) {
 
+    // TODO: linker/loader
+    //          implement linker and loader for program relocation
+    //          implement support for Modification records
+
+    // TODO: better dasm
+    //          where you provide also the symbol table for better disassembling
+    //          would handle data inside any text record and base-relative addressing.
+
     LOG_CHANGE_PRIORITY(LOG_ERROR);
 
     LOGFMT(
