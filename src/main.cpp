@@ -28,18 +28,19 @@ i32 main(i32 argc, char *argv[]) {
         )
     )
 
-    if (argc < 3) {
+    if (argc < 4) {
         LLOG("[", RED_TEXT("USAGE ERROR"), "]:\t")
         LLOG(
             YELLOW_TEXT("Usage: "),
-            "ysicxe <input_object_file> <output_assembly_file>\n"
+            "ysicxe <input_object_file> <output_assembly_file> <output_symtab_file>\n"
         )
 
         return 1;
     }
 
-    string infile = argv[1];
-    string outfile = argv[2];
+    string objfile = argv[1];
+    string asmfile = argv[2];
+    string symtabfile = argv[3];
 
     try {
         // load opcodes from the resource file
@@ -51,7 +52,7 @@ i32 main(i32 argc, char *argv[]) {
         )
 
         // call the disassembler to do the work
-        sic::dasm dasm(infile, outfile);
+        sic::dasm dasm(objfile, asmfile, symtabfile);
         dasm.run();
 
     } catch (const ylib::Error& e) {

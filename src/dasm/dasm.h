@@ -23,7 +23,9 @@ private:
     u32 prog_len;
 
     string objfile;
-    string outfile;
+
+    string asmfile;
+    string symtabfile;
 
     u32 locctr; // location counter
     vector<u8> memory; // memory map to split the object code to bytes
@@ -41,10 +43,11 @@ private:
 
 public:
 
-    dasm(string objfile, string outfile);
+    dasm(string objfile, string asmfile, string symtabfile);
     void run();
     void disassemble();
     void write_asm_to_file();
+    void generate_symbol_table();
 };
 
 } // namespace sic

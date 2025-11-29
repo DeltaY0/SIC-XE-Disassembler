@@ -1,10 +1,11 @@
 #include "dasm.h"
 
 // constructor
-sic::dasm::dasm(string objfile, string outfile) {
+sic::dasm::dasm(string objfile, string asmfile, string symtabfile) {
     locctr = 0;
     this->objfile = objfile;
-    this->outfile = outfile;
+    this->asmfile = asmfile;
+    this->symtabfile = symtabfile;
 }
 
 // main dasm function
@@ -38,7 +39,7 @@ void sic::dasm::run() {
     LOGFMT(
         "MAIN",
         GREEN_TEXT("disassembly successful!\n"),
-        "\toutput saved to: ", outfile, "\n"
+        "\toutput saved to: ", asmfile, "\n"
     )
 }
 
@@ -88,7 +89,7 @@ void sic::dasm::disassemble() {
 }
 
 void sic::dasm::write_asm_to_file() {
-    ofstream out(outfile);
+    ofstream out(asmfile);
 
     using std::left, std::endl, std::setw;
 
@@ -135,6 +136,29 @@ void sic::dasm::write_asm_to_file() {
         << prog_name << endl;
 
     out.close();
+}
+
+void sic::dasm::generate_symbol_table() {
+    // TODO: loop through assembly vector
+    // and give each reference a name and print it to a file
+    ofstream out(symtabfile);
+
+    using std::left, std::endl, std::setw;
+
+    // table header
+    out << left << setw(10)  << "SYMBOL"      // location
+        << left << setw(10) << "ADDRESS"    // label (if any)
+        << endl;
+
+    out << "--------------------" << endl;
+
+    string refname = "REF";
+
+    for(const auto &line : assembly) {
+        // TODO: parse ref
+    }
+
+
 }
 
 // internal functions
