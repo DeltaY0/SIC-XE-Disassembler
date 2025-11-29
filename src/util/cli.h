@@ -22,17 +22,17 @@ inline void draw_progress(i32 start_p, i32 end_p, std::string label, i32 width =
         i32 filled = ratio * width;
 
         // start line + yellow color
-        std::cout << "\r" << TEXT_YELLOW;
+        std::cout << "\r" << "[" << TEXT_YELLOW;
         
         // draw filled part
-        for (i32 i = 0; i < filled; ++i) std::cout << "=";
+        for (i32 i = 0; i < filled; ++i) std::cout << "#";
         std::cout << cursor[p % 4]; 
 
         // draw empty part
         for (i32 i = filled; i < width; ++i) std::cout << " ";
         
         // reset color, pri32 percentage and label
-        std::cout << TEXT_WHITE << std::setw(3) 
+        std::cout << TEXT_WHITE << "]" << std::setw(3) 
                   << p << "% " << label
                   << std::string(20, ' ') << std::flush;
 
