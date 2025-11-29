@@ -1,7 +1,3 @@
-#include "core/logger.h"
-#include "core/error.h"
-
-#include "util/opcode_parser.h"
 #include "dasm/dasm.h"
 
 #define OPCODES_FILE "res/opcodes.txt"
@@ -11,6 +7,8 @@
 #define VERSION_PATCH 0
 
 i32 main(i32 argc, char *argv[]) {
+
+    LOG_CHANGE_PRIORITY(LOG_ERROR);
 
     LOGFMT(
         "MAIN",
@@ -41,7 +39,7 @@ i32 main(i32 argc, char *argv[]) {
 
         LOGFMT(
             "OPCODE",
-            GREEN_TEXT("Loading Operations Successful!"), "\n"
+            GREEN_TEXT("loading operations successful!"), "\n"
         )
 
         // call the disassembler to do the work

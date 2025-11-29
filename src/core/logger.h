@@ -6,6 +6,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <string.h>
+#include <cstdlib>
 
 #include <mutex>
 #define LOCK_MUTEX(x) std::lock_guard<std::mutex> lock(x)
@@ -60,12 +62,15 @@ using std::chrono::system_clock;
 #define FILE_INFO        __FILENAME__, __LINE__
 #define NO_FILE_INFO     nulllptr, nullptr
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 #define LOGINIT() Logger log
 #define LOGINFO(x, y, z)                                                                                               \
     LogInfo info;                                                                                                      \
     info.level = (LogLevel)x;                                                                                          \
     info.filename = y;                                                                                                 \
-    info.linenumber = #z;
+    info.linenumber = STR(z);
 
 #define LOG_CHANGE_PRIORITY(x) Logger::priority = (LogLevel)x;
 
@@ -93,7 +98,7 @@ using std::chrono::system_clock;
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            LOGINFO(LOG_WARN, "", "")                                                                                  \
+            LOGINFO(LOG_WARN, "", "0")                                                                                  \
             log.Log(info, y);                                                                                          \
         }                                                                                                              \
     }
@@ -108,7 +113,7 @@ using std::chrono::system_clock;
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            LOGINFO(LOG_DEBUG, "", "")                                                                                 \
+            LOGINFO(LOG_DEBUG, "", "0")                                                                                 \
             log.Log(info, y);                                                                                          \
         }                                                                                                              \
     }
@@ -123,7 +128,7 @@ using std::chrono::system_clock;
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            LOGINFO(LOG_TRACE, "", "")                                                                                 \
+            LOGINFO(LOG_TRACE, "", "0")                                                                                 \
             log.Log(info, y);                                                                                          \
         }                                                                                                              \
     }
@@ -138,7 +143,7 @@ using std::chrono::system_clock;
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            LOGINFO(LOG_INFO, "", "")                                                                                  \
+            LOGINFO(LOG_INFO, "", "0")                                                                                  \
             log.Log(info, y);                                                                                          \
         }                                                                                                              \
     }
@@ -156,7 +161,7 @@ using std::chrono::system_clock;
 #define LLOG(x...)                                                                                                     \
     {                                                                                                                  \
         LOGINIT();                                                                                                     \
-        LOGINFO(LOG_NONE, "", "")                                                                                      \
+        LOGINFO(LOG_NONE, "", "0")                                                                                      \
         log.Log(info, x);                                                                                              \
     }
 

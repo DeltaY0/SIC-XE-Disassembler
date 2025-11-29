@@ -4,7 +4,7 @@
 #include "../core/error.h"
 #include "../core/logger.h"
 
-#include "base.h"
+#include "../util/base.h"
 
 namespace op {
 
@@ -21,7 +21,7 @@ struct instruction {
 
 // global map to store the instructions
 // maps opcode -> instruction (since we are disassembling)
-map<u8, instruction> instr_table;
+inline map<u8, instruction> instr_table;
 
 const map<u8, string> reg_table = {
     {0, "A"},
@@ -35,7 +35,7 @@ const map<u8, string> reg_table = {
     {9, "SW"}
 };
 
-void load_instructions(string filepath) {
+inline void load_instructions(string filepath) {
     ifstream file(filepath);
     
     if(!file.is_open()) {
@@ -53,7 +53,7 @@ void load_instructions(string filepath) {
 
         ss >> mnemonic >> opcode >> format;
 
-        u8 opc = base::hextobin(opcode);
+        u8 opc = base::hextobin<u8>(opcode);
 
         instruction inst(
             mnemonic,
