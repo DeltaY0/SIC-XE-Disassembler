@@ -28,9 +28,10 @@ void sic::dasm::run() {
 
     // phase 3: saving
     // write the formatted assembly to a file
-    cli::draw_progress(70, 100, "writing to file");
+    cli::draw_progress(70, 100, "writing to file(s)");
 
     write_asm_to_file();
+    write_symtab_to_file();
 
     // reset cursor in terminal
     std::cout << "\033[?25h"; 
@@ -47,7 +48,10 @@ void sic::dasm::disassemble() {
     u32 curr = start_addr;
     u32 end = start_addr + prog_len;
 
+    // reset dasm state
     assembly.clear();
+    symtab.clear();
+    label_counter = 0; // count from zero, hehe
 
     while(curr < end) {
 
@@ -80,6 +84,18 @@ void sic::dasm::disassemble() {
 
         // case: instruction
         asmline line = decode_instruction(curr);
+
+        // handling symbols
+        if(line.is_mem_ref) {
+            // get label (or create a new one)
+            string label_name = get_label(line.target_address);
+            line.operand += label_name;
+        }
+
+        // handle {X} placeholder (for indexed)
+        if(line.indexed) {
+            line.operand += ", X";
+        }
 
         assembly.push_back(line);
 
@@ -138,27 +154,29 @@ void sic::dasm::write_asm_to_file() {
     out.close();
 }
 
-void sic::dasm::generate_symbol_table() {
-    // TODO: loop through assembly vector
-    // and give each reference a name and print it to a file
+void sic::dasm::write_symtab_to_file() {
     ofstream out(symtabfile);
 
     using std::left, std::endl, std::setw;
 
     // table header
-    out << left << setw(10)  << "SYMBOL"      // location
-        << left << setw(10) << "ADDRESS"    // label (if any)
+    out << left << setw(10)  << "SYMBOL"      // label 
+        << left << setw(10) << "ADDRESS"      // location
         << endl;
 
     out << "--------------------" << endl;
 
     string refname = "REF";
 
-    for(const auto &line : assembly) {
-        // TODO: parse ref
+    for(const auto &[addr, name] : symtab) {
+        out << left << setw(10) << name
+            << base::bintohex(addr, 4)
+            << endl;
     }
 
+    out << "--------------------" << endl;
 
+    out.close();
 }
 
 // internal functions
@@ -291,7 +309,7 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
     asmline line;
     line.address = addr;
 
-    // shouldn't happend but just in case
+    // check mem bounds
     if(addr >= memory.size()) {
         line.len = 0; // end of program
         return line;
@@ -301,54 +319,60 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
     u8 byte1 = memory[addr];
     u8 opcode = byte1 & 0xFC; // mask off the least 2 bits (n i flags)
     
-    // unkown opcode
+    // unknown opcode -> handle as data
     if(op::instr_table.find(opcode) == op::instr_table.end()) {
-        // unkown opcode. handle as data
         line.inst.mnemonic = "BYTE";
         line.len = 1;
-        line.objcode = base::bintohex(byte1, 2); // width 2 characters
-        line.operand = "X'" + line.objcode + "'"; // X'00'
+        line.objcode = base::bintohex(byte1, 2);
+        line.operand = "X'" + line.objcode + "'";
         return line;
     }
 
     op::instruction inst = op::instr_table[opcode];
     line.inst = inst;
 
-    // format 1
+    // --- fmt 1 ---
     if(inst.format == 1) {
         line.len = 1;
         line.objcode = base::bintohex(byte1, 2);
         return line;
     }
 
-    // format 2
+    // --- fmt 2 ---
     if(inst.format == 2) {
+        // not enough mem for fmt 2 -> handle as data
+        if (addr + 1 >= memory.size()) { 
+            line.len = 1;
+            line.inst.mnemonic = "BYTE";
+            line.objcode = base::bintohex(byte1, 2);
+            line.operand = "X'" + line.objcode + "'";
+            return line; 
+        }
+
         line.len = 2;
-        if (addr + 1 >= memory.size()) { line.len=0; return line; }
         u8 byte2 = memory[addr + 1];
         line.objcode = base::bintohex(byte1, 2) + base::bintohex(byte2, 2);
 
         // [opcode][r1][r2]
         //    8     4   4
-        u8 r1 = (byte2 >> 4) & 0xF; // discard r2 and mask off opcode bits
+        u8 r1 = (byte2 >> 4) & 0xF; 
         u8 r2 = byte2 & 0xF;
 
-        // get register names, if register is unkown just put U
+        // unkown registers -> just put as 'U'
         string reg1 = op::reg_table.count(r1) ? op::reg_table.at(r1) : "U";
         string reg2 = op::reg_table.count(r2) ? op::reg_table.at(r2) : "U";
 
-        if(inst.mnemonic == "CLEAR" || inst .mnemonic == "TIXR" || inst.mnemonic == "SVC") {
-            // one operand instructions
+        if(inst.mnemonic == "CLEAR" || inst.mnemonic == "TIXR" || inst.mnemonic == "SVC") {
+            // the only fmt 2 instructions that have 1 operand
             line.operand = reg1;
         } else {
             line.operand = reg1 + ", " + reg2;
         }
-
         return line;
     }
 
+    // --- fmt 3/4 check ---
     if (addr + 2 >= memory.size()) {
-        // not enough mem for format 3, handle as data
         line.len = 1;
         line.inst.mnemonic = "BYTE";
         line.objcode = base::bintohex(byte1, 2);
@@ -356,7 +380,6 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
         return line;
     }
     
-    // format 3/4
     u8 byte2 = memory[addr + 1];
     u8 byte3 = memory[addr + 2];
 
@@ -365,17 +388,22 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
     // n i x b p e
     //     0 0 0 e 0 0 0 0
 
-    // check if extended flag is on
+    // extracted flag bits for ease of use
     bool ext = (byte2 >> 4) & 1;
+    bool n = (byte1 >> 1) & 1;
+    bool i = byte1 & 1;
+    bool x = (byte2 >> 7) & 1;
+
+    // for symtab stuff
+    u32 final_target_address = 0;
 
     if(ext) {
-        // fmt 4: [opcode][nixbpe][addr]
+        // --- fmt 4: [opcode][nixbpe][addr] ---
         line.len = 4;
         line.inst.mnemonic = "+" + inst.mnemonic;
         line.inst.format = 4;
 
         if (addr + 3 >= memory.size()) {
-            // not enough mem for format 4, handle as data
             line.len = 1;
             line.inst.mnemonic = "BYTE";
             line.objcode = base::bintohex(byte1, 2);
@@ -387,76 +415,61 @@ sic::asmline sic::dasm::decode_instruction(const u32 &addr)
         line.objcode = base::bintohex(byte1, 2) + base::bintohex(byte2, 2) + 
                        base::bintohex(byte3, 2) + base::bintohex(byte4, 2);
 
-        // address calculation (full 20 bits)
+        // dddress Calculation (full 20 bits)
         // [opcode][nixbpe][addr]
         //                 16 bits = bytes 2 and 3
         // add the 4 bits from byte 2
         u32 full_addr = (byte2 & 0xF) << 16;
         full_addr |= (byte3 << 8);
         full_addr |= byte4;
-
-        // n i flags -> n = 0, i = 1
-        if(!(byte1 & 0b0010) && (byte1 & 0b0001))
-            line.operand = "#"; // immediate
-
-        // n i flags -> n = 1, i = 0
-        if((byte1 & 0b0010) && !(byte1 & 0b0001))
-            line.operand = "@"; // indirect
-
-        if (!(byte1 & 0b0010) && (byte1 & 0b0001))
-            line.operand += std::to_string(full_addr); // show Value
-        else
-            line.operand += base::bintohex(full_addr, 4); // show Address
-
-        // indexed
-        if((byte2 >> 7) & 1) line.operand += ", X";
-    }
+        
+        final_target_address = full_addr;
+    } 
     else {
-        // fmt 3: [opcode][nixbpe][disp]
-
+        // --- fmt 3: [opcode][nixbpe][disp] ---
         line.len = 3;
-        line.objcode = base::bintohex(byte1, 2) +
-            base::bintohex(byte2, 2) + base::bintohex(byte3, 2);
+        line.objcode = base::bintohex(byte1, 2) + 
+                       base::bintohex(byte2, 2) + base::bintohex(byte3, 2);
 
         // disp = 12 bits = 4 bits from byte2 | byte3
-        i32 disp = ((byte2 & 0b1111) << 8) | byte3;
-
+        i32 disp = ((byte2 & 0xF) << 8) | byte3;
+        
         // if disp is negative -> extend 2's complement
         if (disp & 0x800) disp |= 0xFFFFF000;
 
-        // addressing
+        // addressing flags
         // x b p e x x x x
         // 0 b p 0 0 0 0 0
-        bool pc_rel =   (byte2 >> 5) & 1;
-        bool base_rel = (byte2 >> 6) & 1;
+        bool pc_rel = (byte2 >> 5) & 1;
+        // base relative would be handled in symbol logic (i think)
 
-        i32 target = disp;
-        if(pc_rel) target += (addr + 3);
-
-        // we don't have the content of Base register....
-        // we would need a symbol table
-        string addr_suffix = "";
-        if (base_rel) {
-            addr_suffix = "+ (B)"; 
-        }
-
-        // n i flags -> n = 0, i = 1
-        if(!(byte1 & 0b0010) && (byte1 & 0b0001))
-            line.operand = "#"; // immediate
-
-        // n i flags -> n = 1, i = 0
-        if((byte1 & 0b0010) && !(byte1 & 0b0001))
-            line.operand = "@"; // indirect
-
-        if (!(byte1 & 0b0010) && (byte1 & 0b0001))
-            line.operand += std::to_string(target); // show Value
+        if (pc_rel)
+            final_target_address = (addr + 3) + disp;
         else
-            line.operand += base::bintohex(target, 4) + addr_suffix; // show Address
-
-
-        // indexed
-        if((byte2 >> 7) & 1) line.operand += ", X";
+            final_target_address = disp; 
     }
+
+    // --- operand formatting ---
+
+    // n i flags -> n = 0, i = 1 (immediate)
+    if (!n && i) {
+        line.is_mem_ref = false; 
+        line.operand = "#" + std::to_string(final_target_address);
+    }
+    // mem ref (simple or indirect)
+    else {
+        line.is_mem_ref = true;
+        line.target_address = final_target_address;
+
+        // n i flags -> n = 1, i = 0 (indirect)
+        if (n && !i) line.operand = "@"; 
+        else line.operand = ""; // simple
+
+        // NOTE: adding the symbol name (REFxxx) later in disassemble
+    }
+
+    // indexed addressing
+    line.indexed = x;
 
     return line;
 }
