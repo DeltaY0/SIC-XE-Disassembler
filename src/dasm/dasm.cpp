@@ -121,7 +121,7 @@ void sic::dasm::write_asm_to_file() {
 
     out << left << setw(8)  << "" 
         << left << setw(10) << "" 
-        << left << setw(10) << "BLOCK" 
+        << left << setw(10) << "START" 
         << prog_name << endl;
 
     for(const auto &line : assembly) {
@@ -129,8 +129,10 @@ void sic::dasm::write_asm_to_file() {
         out << left << setw(8) << base::bintohex(line.address, 4);
 
         // column 2 - label 
-        // TODO: surprise: we don't have labels yet!
-        out << left << setw(10) << "";
+        if (symtab.count(line.address))
+            out << left << setw(10) << symtab[line.address];
+        else
+            out << left << setw(10) << ""; 
 
         // column 3 - mnemonic
         out << left << setw(10) << line.inst.mnemonic;
@@ -180,6 +182,22 @@ void sic::dasm::write_symtab_to_file() {
 }
 
 // internal functions
+string sic::dasm::get_label(u32 addr) {
+    // 1. If we already visited this address, return existing label
+    if (symtab.find(addr) != symtab.end()) {
+        return symtab[addr];
+    }
+
+    // 2. Generate new label (REF + 4 digit counter)
+    stringstream ss;
+    ss << "REF" << std::setfill('0') << std::setw(4) << label_counter++;
+    string label = ss.str();
+
+    // 3. Store in map and return
+    symtab[addr] = label;
+    return label;
+}
+
 void sic::dasm::process_obj_file() {
     ifstream file(objfile);
     
