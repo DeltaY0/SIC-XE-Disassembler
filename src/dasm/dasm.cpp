@@ -12,7 +12,7 @@ sic::dasm::dasm(string objfile, string asmfile, string symtabfile) {
 void sic::dasm::run() {
 
     // hide cursor in terminal
-    std::cout << "\033[?25l";
+    cli::init_progress_bar();
 
     // phase 1: loader
     // read HTE recs and fill memory map
@@ -33,12 +33,11 @@ void sic::dasm::run() {
     write_asm_to_file();
     write_symtab_to_file();
 
-    // reset cursor in terminal
-    std::cout << "\033[?25h"; 
-    std::cout << std::endl;
+    // reset terminal
+    cli::reset_terminal();
 
     LOGFMT(
-        "MAIN",
+        "DASM",
         GREEN_TEXT("disassembly successful!\n"),
         "\toutput saved to: ", asmfile, "\n"
     )
@@ -219,6 +218,8 @@ void sic::dasm::process_obj_file() {
                 clean_line += c;
             }
         }
+
+        if(clean_line.empty()) continue;
 
         LDEBUG(true, "\noutputting HTE line:\t", clean_line, "\n")
 

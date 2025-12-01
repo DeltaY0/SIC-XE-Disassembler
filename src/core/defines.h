@@ -10,12 +10,14 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <vector>
 
 using std::string;
 using std::map;
 using std::ifstream;
 using std::ofstream;
 using std::stringstream;
+using std::vector;
 
 // unsigned int types
 typedef unsigned char u8;

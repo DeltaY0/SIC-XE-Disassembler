@@ -2,9 +2,6 @@
 #include  "opcode_parser.h"
 #include "../util/cli.h"
 
-#include <vector>
-using std::vector;
-
 namespace sic {
 
 struct asmline {

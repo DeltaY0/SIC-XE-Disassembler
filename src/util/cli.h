@@ -10,6 +10,15 @@
 
 namespace cli {
 
+inline void init_progress_bar() {
+    std::cout << "\033[?25l";
+}
+
+inline void reset_terminal() {
+    std::cout << "\033[?25h"; 
+    std::cout << std::endl;
+}
+
 inline string cursor = "|/-\\";
 
 inline void draw_progress(i32 start_p, i32 end_p, std::string label, i32 width = 40) {

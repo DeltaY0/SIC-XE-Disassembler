@@ -22,6 +22,11 @@ class Error
     {
     }
 
+    Error(string msg)
+        : message{msg.c_str()}, code{YLIB_ERR_UNKNOWN}
+    {
+    }
+
     Error(const u32 code, const char *message)
         : code{code}, message{message}
     {
