@@ -1,6 +1,11 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+// project specific
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 2
+#define VERSION_PATCH 10
+
 #include <corecrt.h>
 
 // stl libraries

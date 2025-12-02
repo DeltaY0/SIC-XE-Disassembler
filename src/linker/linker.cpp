@@ -29,6 +29,44 @@ void sic::linker::run(u32 start_addr) {
     )
 }
 
+void sic::linker::write_memory_to_file(string filepath) {
+    ofstream out(filepath, std::ios::binary);
+    
+    if (!out.is_open()) {
+        throw ylib::Error("Linker: Could not open output file " + filepath);
+    }
+
+    // write raw binary memory
+    out.write(reinterpret_cast<const char*>(memory.data()), memory.size());
+    out.close();
+
+    LOGFMT("LINKER", "Memory dump saved to: ", CYAN_TEXT(filepath), "\n");
+}
+
+void sic::linker::write_estab_to_file(string filepath) {
+    ofstream out(filepath);
+
+    if (!out.is_open()) {
+        throw ylib::Error("linker: Could not open export file " + filepath);
+    }
+
+    using std::left, std::setw, std::endl;
+
+    // Header
+    out << left << setw(10) << "SYMBOL" 
+        << left << setw(10) << "ADDRESS" << endl;
+    out << "--------------------" << endl;
+    
+    // Data
+    for (const auto &[sym, addr] : estab) {
+        out << left << setw(10) << sym 
+            << base::bintohex(addr, 6) << endl;
+    }
+    out.close();
+
+    LOGFMT("LINKER", "symbol table exported to: ", CYAN_TEXT(filepath), "\n");
+}
+
 // private functions
 void sic::linker::pass1() {
     // start control section at the beginning

@@ -51,6 +51,9 @@ public:
     void add_file(string filename);
     void run(u32 start_addr = 0x00000);
 
+    void write_memory_to_file(string filepath);
+    void write_estab_to_file(string filepath);
+
     // getters for priv fields (where's C# {get; private set} ??? im crying)
     vector<u8> get_memory() const { return memory; }
     u32 get_total_len() const { return total_len; }
