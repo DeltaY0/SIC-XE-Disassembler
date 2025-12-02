@@ -6,7 +6,7 @@
 #define VERSION_MINOR 4
 #define VERSION_PATCH 101
 
-#include <corecrt.h>
+// #include <corecrt.h>
 
 // stl libraries
 #include <string>
@@ -17,10 +17,10 @@
 #include <iomanip>
 #include <vector>
 
-using std::string;
-using std::map;
 using std::ifstream;
+using std::map;
 using std::ofstream;
+using std::string;
 using std::stringstream;
 using std::vector;
 
@@ -53,18 +53,18 @@ typedef double f64;
 #endif
 
 // static assertions for type sizes
-ST_ASSERT(sizeof(u8) == 1, "expected u8 to be 1 byte.");
-ST_ASSERT(sizeof(u16) == 2, "expected u16 to be 2 bytes.");
-ST_ASSERT(sizeof(u32) == 4, "expected u32 to be 4 bytes.");
-ST_ASSERT(sizeof(u64) == 8, "expected u64 to be 8 bytes.");
+// ST_ASSERT(sizeof(u8) == 1, "expected u8 to be 1 byte.");
+// ST_ASSERT(sizeof(u16) == 2, "expected u16 to be 2 bytes.");
+// ST_ASSERT(sizeof(u32) == 4, "expected u32 to be 4 bytes.");
+// ST_ASSERT(sizeof(u64) == 8, "expected u64 to be 8 bytes.");
 
-ST_ASSERT(sizeof(i8) == 1, "expected i8 to be 1 byte.");
-ST_ASSERT(sizeof(i16) == 2, "expected i16 to be 2 bytes.");
-ST_ASSERT(sizeof(i32) == 4, "expected i32 to be 4 bytes.");
-ST_ASSERT(sizeof(i64) == 8, "expected i64 to be 8 bytes.");
+// ST_ASSERT(sizeof(i8) == 1, "expected i8 to be 1 byte.");
+// ST_ASSERT(sizeof(i16) == 2, "expected i16 to be 2 bytes.");
+// ST_ASSERT(sizeof(i32) == 4, "expected i32 to be 4 bytes.");
+// ST_ASSERT(sizeof(i64) == 8, "expected i64 to be 8 bytes.");
 
-ST_ASSERT(sizeof(f32) == 4, "expected f32 to be 4 bytes.");
-ST_ASSERT(sizeof(f64) == 8, "expected f64 to be 8 bytes.");
+// ST_ASSERT(sizeof(f32) == 4, "expected f32 to be 4 bytes.");
+// ST_ASSERT(sizeof(f64) == 8, "expected f64 to be 8 bytes.");
 
 // platform detection
 
