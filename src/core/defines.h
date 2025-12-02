@@ -3,8 +3,8 @@
 
 // project specific
 #define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 10
+#define VERSION_MINOR 4
+#define VERSION_PATCH 101
 
 #include <corecrt.h>
 

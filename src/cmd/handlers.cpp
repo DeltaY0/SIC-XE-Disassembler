@@ -46,7 +46,7 @@ void handle_dasm(vector<string> &cmdIn, map<string, string> &args) {
     tool.run();
 }
 
-void HandleLinker(vector<string> &cmdIn, map<string, string> &args) {
+void handle_linker(vector<string> &cmdIn, map<string, string> &args) {
     sic::linker tool;
     vector<string> files_to_link;
 

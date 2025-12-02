@@ -81,7 +81,7 @@ echo compiling source code...
 
 set compilerFlags=
 rem -g -Wvarargs -Wall -Werror
-set includeFlags=-Isrc/ -Isrc/core/ -Isrc/dasm/
+set includeFlags=-Isrc/ -Isrc/core/ -Isrc/dasm/ -Isrc/linker/ -Isrc/cmd/
 rem -I./thirdparty/include/
 
 echo running: clang++ %cppFiles% %compilerFlags% %includeFlags% %defines% -o ./bin/%outputAssembly%

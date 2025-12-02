@@ -1,6 +1,6 @@
-# SIC/XE Toolkit (Disassembler, Loader, Linker)
+# SIC/XE Toolkit (Disassembler, Linker)
 
-A suite of tools for the Simplified Instructional Computer (SIC/XE), written in modern C++. This project currently features a functional disassembler, with a loader and linker under active development.
+A suite of tools for the Simplified Instructional Computer (SIC/XE), written in modern C++. This project currently features a functional disassembler and a linker.
 
 ## Table of Contents
 
@@ -8,25 +8,24 @@ A suite of tools for the Simplified Instructional Computer (SIC/XE), written in 
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Building](#building)
-  - [Usage](#usage)
+- [Usage](#usage)
+  - [Commands](#commands)
+    - [dasm](#dasm)
+    - [link](#link)
 - [Project Structure](#project-structure)
 - [How It Works](#how-it-works)
+  - [Disassembler](#disassembler)
+  - [Linker](#linker)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Features
 
-### Current
 *   **SIC/XE Disassembler**: Translates SIC/XE object code from an object file back into human-readable assembly source code.
-*   **Opcode-based Parsing**: Utilizes an external opcode definition file (`opcodes.txt`) for easy modification and extension.
+*   **SIC/XE Linker**: Links multiple object files into a single loadable memory image.
+*   **Opcode-based Parsing**: Utilizes an external opcode definition file (`res/opcodes.txt`) for easy modification and extension.
 *   **Cross-Platform Core**: Written in standard C++ with platform-specific code isolated.
 *   **Built-in Logger**: A powerful and configurable logger for debugging and tracing program execution.
-
-### Planned
-*   **SIC/XE Loader**: A linking loader to simulate the execution of object programs.
-*   **SIC/XE Linker**: A linker to process multiple object programs and resolve external references.
-*   **Expanded Addressing Mode Support**: Full support for all SIC/XE addressing modes in the disassembler.
-*   **Listing File Generation**: Output a `.lis` file that shows the object code alongside the generated assembly.
 
 ## Getting Started
 
@@ -46,76 +45,7 @@ Follow these instructions to get a copy of the project up and running on your lo
     cd <repository-folder>
     ```
 
-2.  **Create a data directory and opcode file:**
-    The disassembler requires an opcode definition file.
-    *   Create a directory named `data` in the project root.
-    *   Inside `data`, create a file named `opcodes.txt`.
-    *   Populate `opcodes.txt` with SIC/XE instructions. Each line should be in the format: `MNEMONIC OPCODE FORMAT`.
-
-    **Example `res/opcodes.txt`:**
-    ```
-    ADD 18 3
-    ADDF 58 3
-    ADDR 90 2
-    AND 40 3
-    CLEAR B4 2
-    COMP 28 3
-    COMPF 88 3
-    COMPR A0 2
-    DIV 24 3
-    DIVF 64 3
-    DIVR 9C 2
-    FIX C4 1
-    FLOAT C0 1
-    HIO F4 1
-    J 3C 3
-    JEQ 30 3
-    JGT 34 3
-    JLT 38 3
-    JSUB 48 3
-    LDA 00 3
-    LDB 68 3
-    LDCH 50 3
-    LDF 70 3
-    LDL 08 3
-    LDS 6C 3
-    LDT 74 3
-    LDX 04 3
-    LPS D0 3
-    MUL 20 3
-    MULF 60 3
-    MULR 98 2
-    NORM C8 1
-    OR 44 3
-    RD D8 3
-    RMO B8 2
-    RSUB 4C 3
-    SHIFTL A4 2
-    SHIFTR A8 2
-    SIO F0 1
-    SSK E0 3
-    STA 0C 3
-    STB 78 3
-    STCH 54 3
-    STF 80 3
-    STI D4 3
-    STL 14 3
-    STS 7C 3
-    STSW E8 3
-    STT 84 3
-    STX 10 3
-    SUB 1C 3
-    SUBF 5C 3
-    SUBR 94 2
-    SVC B0 2
-    TD E0 3
-    TIO F8 1
-    TIX 2C 3
-    TIXR B8 2
-    WD DC 3
-    ```
-
-3.  **Run the build script:**
+2.  **Run the build script:**
     *   **On Windows:**
         ```bat
         .\build.bat
@@ -128,12 +58,57 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     The executable `ysicxe.exe` (or `ysicxe` on non-Windows systems) will be created in the `bin` directory.
 
-### Usage
+## Usage
 
-Run the disassembler from the command line, providing the input object file and the desired output assembly file name.
+The program is run from the command line. The first argument is the command you want to execute (`dasm` or `link`), followed by the command's arguments.
 
 ```sh
-./bin/ysicxe <path/to/object_file.obj> <path/to/output_file.asm>
+./bin/ysicxe <command> [args...]
+```
+
+### Commands
+
+#### `dasm`
+Disassembles a SIC/XE object file into assembly source code.
+
+**Usage:**
+```sh
+./bin/ysicxe dasm <file> [args...]
+```
+
+**Arguments:**
+
+| Flag(s)          | Description                                                    | Required | Default   |
+| ---------------- | -------------------------------------------------------------- | -------- | --------- |
+| `-i`, `--input`  | Path to the input object file (`.obj`).                        | Yes      |           |
+| `-o`, `--output` | Path to the output source file (`.asm`).                       | No       | `out.asm` |
+| `-s`, `--symtab` | Path to an external symbol table for label resolution.         | No       |           |
+
+**Example:**
+```sh
+./bin/ysicxe dasm -i test/testxy.obj -o test/testxy.asm -s test/testxy_symtab.txt
+```
+
+#### `link`
+Links multiple SIC/XE object files into a single executable memory image.
+
+**Usage:**
+```sh
+./bin/ysicxe link [args...]
+```
+
+**Arguments:**
+
+| Flag(s)             | Description                                                         | Required | Default |
+| ------------------- | ------------------------------------------------------------------- | -------- | ------- |
+| `-i`, `--inputs`    | Comma-separated list of input object files.                         | Yes      |         |
+| `-o`, `--output`    | Path to the output executable/memory-dump file.                     | No       | `a.out` |
+| `-a`, `--addr`      | Starting load address in hexadecimal.                               | No       | `0`     |
+| `-e`, `--export-estab`| Export the global symbol table (ESTAB) to a file.                  | No       |         |
+
+**Example:**
+```sh
+./bin/ysicxe link -i test/prog1.obj,test/prog2.obj -o test/linked.exe -a 4000
 ```
 
 ## Project Structure
@@ -143,15 +118,21 @@ Run the disassembler from the command line, providing the input object file and 
 ├── res/              # Data files (e.g., opcodes.txt)
 ├── obj/              # Intermediate object files (.o)
 ├── src/              # C++ source code
+│   ├── cmd/          # Command line parsing and handlers
 │   ├── core/         # Core modules (logger, defines, error handling)
-│   ├── util/         # Utility helpers (opcode parser, base conversion)
+│   ├── dasm/         # Disassembler implementation
+│   ├── linker/       # Linker implementation
+│   ├── util/         # Utility helpers
 │   └── main.cpp      # Main application entry point
+├── test/             # Test files
 ├── .gitignore
 ├── build.bat         # Windows build script
 └── README.md
 ```
 
 ## How It Works
+
+### Disassembler
 
 The disassembler operates by reading a SIC/XE object file, which consists of Header (H), Text (T), and End (E) records.
 
@@ -160,7 +141,22 @@ The disassembler operates by reading a SIC/XE object file, which consists of Hea
 3.  **Process Text Records**: For each `T` record, it iterates through the object code byte by byte.
 4.  **Instruction Lookup**: It identifies the opcode for an instruction. The two least significant bits are masked off to handle format 4 instructions correctly.
 5.  **Decode and Reconstruct**: Based on the instruction's format (1, 2, 3, or 4), it decodes the operands and addressing modes. It then reconstructs the corresponding assembly language instruction.
-6.  **Generate Assembly**: The reconstructed assembly lines, along with labels, directives (`START`, `END`, `RESW`, `RESB`, `BYTE`, `WORD`), are written to the specified output file.
+6.  **Symbol Resolution**: If a symbol table is provided, the disassembler will use it to resolve addresses into labels, making the output more readable.
+7.  **Generate Assembly**: The reconstructed assembly lines, along with labels, directives (`START`, `END`, `RESW`, `RESB`, `BYTE`, `WORD`), are written to the specified output file.
+
+### Linker
+
+The linker performs a two-pass process to resolve external references between different object files and create a single, loadable program.
+
+*   **Pass 1:**
+    1.  **Process Control Sections:** The linker processes each control section from the input object files.
+    2.  **Build ESTAB:** It builds an External Symbol Table (ESTAB), which stores the names and addresses of all external symbols (defined in `D` records).
+    3.  **Assign Addresses:** It assigns a starting address to each control section and calculates the length of the linked program.
+
+*   **Pass 2:**
+    1.  **Generate Object Code:** The linker generates the final object code by processing the `T` records of each control section.
+    2.  **Resolve External References:** It uses the ESTAB built in Pass 1 to resolve external references (found in `M` records). It modifies the object code at the specified locations to insert the correct addresses.
+    3.  **Write Executable:** The final, linked object code is written to the output file, which can then be loaded into memory for execution.
 
 ## Contributing
 
@@ -174,4 +170,4 @@ Contributions are welcome! If you'd like to contribute, please follow these step
 
 ## License
 
-This project is open-source and under the MIT License, learn more by reading the LICENSE file
+This project is open-source and under the MIT License, learn more by reading the LICENSE file.

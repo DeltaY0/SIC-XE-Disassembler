@@ -39,63 +39,58 @@ vector<Cmd> commands = {
 #pragma endregion
 
 i32 main(i32 argc, char *argv[]) {
-
-    // TODO: implement command line tool from ylib
-    //          to handle subcommands like dasm, or link, help, etc...
-
-
-    // handling commands
-
-    vector<string> args(argv, argv + argc);
-    // NOTE: to look for a value in the commandArgument map remember: 
-    //          the key is the name of the argument.
-    
-
-    // end handling commands
-
     LOG_CHANGE_PRIORITY(LOG_ERROR);
 
-    LOGFMT(
-        "MAIN",
-        "version\t",
-        YELLOW_TEXT(
-            VERSION_MAJOR, ".",
-            VERSION_MINOR, ".",
-            VERSION_PATCH
-        )
-    )
-
-    if (argc < 4) {
-        LLOG("[", RED_TEXT("USAGE ERROR"), "]:\t")
-        LLOG(
-            YELLOW_TEXT("Usage: "),
-            "ysicxe <input_object_file> <output_assembly_file> <output_symtab_file>\n"
-        )
-
-        return 1;
-    }
-
-    string objfile = argv[1];
-    string asmfile = argv[2];
-    string symtabfile = argv[3];
-
+    // load opcodes from the resource file
     try {
-        // load opcodes from the resource file
         op::load_instructions(OPCODES_FILE);
-
-        LOGFMT(
-            "OPCODE",
-            GREEN_TEXT("loading operations successful!"), "\n"
-        )
-
-        // call the disassembler to do the work
-        sic::dasm dasm(objfile, asmfile, symtabfile);
-        dasm.run();
-
-    } catch (const ylib::Error& e) {
+    }
+    catch (const ylib::Error& e) {
         LLOG("[", RED_TEXT("ERROR"), "]:\t")
         LLOG(e.what())
         return e.errcode();
+    }
+
+    vector<string> args(argv, argv + argc);
+    if(args.size() == 1 || (args.size() == 2 && (args[1] == "-?" || args[1] == "--version")))
+    {
+        ylib::output_project_info();
+        exit(0);
+    }
+
+    if(args.size() == 2)
+    {
+        if(args[1] == "-h" || args[1] == "--help" || args[1] == "help" || args[1] == "h")
+        {
+            ylib::output_help_info(commands);
+            exit(0);
+        }
+    }
+
+    ylib::CommandInfo cmd_info;
+
+    try {
+        cmd_info = ylib::parse_cli(args, commands);
+    }
+    catch(ylib::Error &err) {
+        LOGFMT(
+            "CMD",
+            RED_TEXT("error: couldn't parse commands.\n\t"),
+            err.what()
+        )
+        exit(1);
+    }
+
+    try {
+        cmd_info.call_function();
+    }
+    catch(ylib::Error &err) {
+        LOGFMT(
+            "CMD",
+            RED_TEXT("error: couldn't call the command:"), cmd_info.cmd.name, "\n\t",
+            err.what()
+        )
+        exit(1);
     }
 
     return 0;
